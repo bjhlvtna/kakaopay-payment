@@ -30,30 +30,29 @@ public class TelegramFormatter {
 
     public enum Item {
         // 데이터 길이 / 숫자 / 4 / "데이터 길이"를 제외한 총 길이
-        // 데이터 구분 / 문자 / 10 / 기능 구분값, 승인(PAYMENT), 취소(CANCEL)
-        // 관리번호 / 문자 / 20 / unique id(20자리)
         DATA_LENGTH("DATA_LENGTH", 4, DataType.NUMBER),
+        // 데이터 구분 / 문자 / 10 / 기능 구분값, 승인(PAYMENT), 취소(CANCEL)
         DATA_CLASSIFICATION("DATA_CLASSIFICATION", 10, DataType.TEXT),
+        // 관리번호 / 문자 / 20 / unique id(20자리)
         MANAGEMENT_NUMBER("MANAGEMENT_NUMBER", 20, DataType.TEXT),
 
         // 카드 번호 / 숫자(L) / 20 / 카드번호 / 최소 10자리, 최대 20자리
-        // 할부 개월 수 / 숫 자 (0) / 2/ 일시불인 경우 "00", 2개월인 경 우는 "02"로 저장 / 일시불, 2개월 ~ 12개월, 취소시에는 일시불 "00"로 저장
-        // 카드 유효 기간 / 숫 자 (L) / 4 / 카드 유효기간 / 월(2자리), 년도(2자리) ex) 0125 -> 2025년 1월까지
-        // cvc / 숫자(L) / 3 / 카드 cvc 데이터 /
-        // 거래 금액 / 숫자 / 10 / 결제/취소 금액 / 결제 : 100원 이상, 취소 : 결제 금액보다 작아 야함
-        // 부가 가치 세 / 숫 자 (0) / 10 / 결제/취소 금액의 부가세 / 거래금액보다는 작아야한다. 취소의 경우, 원 거 래 금액의 부가가치세와 총 취소금액의 부가가 치세의 합과 같아야 한다.
-        // 원거 래관 리번 호 / 문 자 / 20 / 취소시에만 결제 관리번호 저장 / 결제시에는 공백
-        // 암호 화된 카드 정보 / 문자 / 300 / 카드번호, 유호기 간, cvc 데이터를 안전하게 암호화 / 암/복호화 방식 자유롭게 선택
-        // 예비 필드 / 문자 / 47 / /
-
         CARD_NUMBER("CARD_NUMBER", 20, DataType.NUMBER_L),
+        // 할부 개월 수 / 숫 자 (0) / 2/ 일시불인 경우 "00", 2개월인 경 우는 "02"로 저장 / 일시불, 2개월 ~ 12개월, 취소시에는 일시불 "00"로 저장
         INSTALLMENT_MONTH("INSTALLMENT_MONTH", 2, DataType.NUMBER_0),
+        // 카드 유효 기간 / 숫 자 (L) / 4 / 카드 유효기간 / 월(2자리), 년도(2자리) ex) 0125 -> 2025년 1월까지
         VALIDITY("VALIDITY", 4, DataType.NUMBER_L),
+        // cvc / 숫자(L) / 3 / 카드 cvc 데이터 /
         CVC("CVC", 3, DataType.NUMBER_L),
+        // 거래 금액 / 숫자 / 10 / 결제/취소 금액 / 결제 : 100원 이상, 취소 : 결제 금액보다 작아 야함
         AMOUNT("AMOUNT", 10, DataType.NUMBER),
+        // 부가 가치 세 / 숫 자 (0) / 10 / 결제/취소 금액의 부가세 / 거래금액보다는 작아야한다. 취소의 경우, 원 거 래 금액의 부가가치세와 총 취소금액의 부가가 치세의 합과 같아야 한다.
         VALUE_ADDED_TAX("VALUE_ADDED_TAX", 10, DataType.NUMBER_0),
+        // 원거 래관 리번 호 / 문 자 / 20 / 취소시에만 결제 관리번호 저장 / 결제시에는 공백
         ORIGIN_MANAGEMENT_NUMBER("ORIGIN_MANAGEMENT_NUMBER", 20, DataType.TEXT),
+        // 암호 화된 카드 정보 / 문자 / 300 / 카드번호, 유호기 간, cvc 데이터를 안전하게 암호화 / 암/복호화 방식 자유롭게 선택
         ENCRYPT_CART_INFO("ENCRYPT_CART_INFO", 300, DataType.TEXT),
+        // 예비 필드 / 문자 / 47 / /
         EXTRA_FIELD("EXTRA_FIELD", 47, DataType.TEXT);
 
         @Getter

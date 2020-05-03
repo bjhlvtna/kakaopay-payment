@@ -1,14 +1,11 @@
 package com.kakaopay.payment.controller;
 
-import com.kakaopay.payment.dto.RequestDto;
-import com.kakaopay.payment.dto.ResponseDto;
-import com.kakaopay.payment.model.CardInfo;
-import com.kakaopay.payment.model.Payment;
-import com.kakaopay.payment.model.PaymentCardInfo;
+import com.kakaopay.payment.dto.PaymentDto;
 import com.kakaopay.payment.service.PaymentService;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -21,59 +18,35 @@ import javax.validation.Valid;
 @RequestMapping(path = "/api/v1")
 public class PaymentController {
 
-    private static final int MAX_ID_LENGTH = 20;
-
-    private ModelMapper modelMapper;
     private PaymentService paymentService;
 
     @Autowired
-    public PaymentController(ModelMapper modelMapper, PaymentService paymentService) {
-        this.modelMapper = modelMapper;
+    public PaymentController(PaymentService paymentService) {
         this.paymentService = paymentService;
     }
 
+    @ApiOperation(value = "결제 API")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(path = "/payments", consumes = "application/json; charset=UTF-8")
-    public String createPayment(@RequestBody @Valid RequestDto.Payment paymentReq) throws Exception {
-        Payment payment = (Payment) convert(paymentReq, Payment.class);
-        payment.setManagementNumber(generateManagementNumber());
-        // TODO: model converter 로 구현?
-        CardInfo cardInfo = CardInfo.builder()
-                .cardNumber(paymentReq.getCardNumber())
-                .validity(paymentReq.getValidity())
-                .cvc(paymentReq.getCvc())
-                .build();
-        PaymentCardInfo paymentCardInfo = PaymentCardInfo.builder()
-                .paymentID(payment.getManagementNumber())
-                .cardInfo(cardInfo)
-                .build();
-        payment.setPaymentCardInfo(paymentCardInfo);
-
-        return this.paymentService.process(payment);
+    public String createPayment(@RequestBody @Valid PaymentDto.PaymentReq paymentReq) throws Exception {
+        return this.paymentService.payProcess(paymentReq);
     }
 
-    // update
+    @ApiOperation(value = "결제 취소 API")
     // TODO: path param & request body
     @ResponseStatus(HttpStatus.OK)
     @PutMapping(path = "/payments/cancel", consumes = "application/json; charset=UTF-8")
-    public String updatePayment(@RequestBody @Valid RequestDto.Cancel cancelReq) throws Exception {
-        Payment cancel = (Payment) convert(cancelReq, Payment.class);
-        cancel.setManagementNumber(generateManagementNumber());
-        return this.paymentService.process(cancel);
+    public String updatePayment(@RequestBody @Valid PaymentDto.CancelReq cancelReq) throws Exception {
+        return this.paymentService.cancelProcess(cancelReq);
     }
 
+    @ApiOperation(value = "결제 조회 API")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "managementNumber", value = "결제 관리 번호", required = true, dataType = "string", paramType = "path")
+    })
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(path = "/payments/{managementNumber}", produces = "application/json")
-    public ResponseDto.Payment getPayment(@PathVariable String managementNumber) throws Exception {
-        Payment payment = this.paymentService.findByManagementNumber(managementNumber);
-        return (ResponseDto.Payment) convert(payment, ResponseDto.Payment.class);
-    }
-
-    private Object convert(Object object, Class<?> type) {
-        return modelMapper.map(object, type);
-    }
-
-    private String generateManagementNumber() {
-        return RandomStringUtils.randomAlphanumeric(MAX_ID_LENGTH);
+    @GetMapping(path = "/payments/{managementNumber}", produces = "application/json; charset=UTF-8")
+    public PaymentDto.PaymentRes getPayment(@PathVariable String managementNumber) throws Exception {
+        return this.paymentService.findByManagementNumber(managementNumber);
     }
 }

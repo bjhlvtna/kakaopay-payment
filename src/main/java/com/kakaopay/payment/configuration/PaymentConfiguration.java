@@ -1,24 +1,16 @@
 package com.kakaopay.payment.configuration;
 
 import com.kakaopay.payment.common.PaymentType;
-import com.kakaopay.payment.dto.RequestDto;
-import com.kakaopay.payment.dto.ResponseDto;
-import com.kakaopay.payment.model.CardInfo;
+import com.kakaopay.payment.dto.PaymentDto;
 import com.kakaopay.payment.model.Payment;
-import com.kakaopay.payment.model.PaymentCardInfo;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
-import org.omg.CORBA.Request;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class PaymentConfiguration {
-
-
 
     @Bean(name = "modelMapper")
     public ModelMapper modelMapper() {
@@ -29,16 +21,16 @@ public class PaymentConfiguration {
         return modelMapper;
     }
 
-    private PropertyMap<RequestDto.Payment, Payment> generateRequestPaymentDtoMapping() {
-        return new PropertyMap<RequestDto.Payment, Payment>() {
+    private PropertyMap<PaymentDto.PaymentReq, Payment> generateRequestPaymentDtoMapping() {
+        return new PropertyMap<PaymentDto.PaymentReq, Payment>() {
             protected void configure() {
                 map().setPaymentType(PaymentType.PAYMENT);
             }
         };
     }
 
-    private PropertyMap<RequestDto.Cancel, Payment> generateRequestCancelDtoMapping() {
-        return new PropertyMap<RequestDto.Cancel, Payment>() {
+    private PropertyMap<PaymentDto.CancelReq, Payment> generateRequestCancelDtoMapping() {
+        return new PropertyMap<PaymentDto.CancelReq, Payment>() {
             protected void configure() {
                 map().setPaymentType(PaymentType.CANCEL);
                 map().setOriginManagementNumber(source.getManagementNumber());
@@ -47,8 +39,8 @@ public class PaymentConfiguration {
         };
     }
 
-    private PropertyMap<Payment, ResponseDto.Payment> generateResponseDtoMapping() {
-        return new PropertyMap<Payment, ResponseDto.Payment>() {
+    private PropertyMap<Payment, PaymentDto.PaymentReq> generateResponseDtoMapping() {
+        return new PropertyMap<Payment, PaymentDto.PaymentReq>() {
             protected void configure() {
                 map().setCardNumber(source.getPaymentCardInfo().getCardInfo().getCardNumber());
                 map().setValidity(source.getPaymentCardInfo().getCardInfo().getValidity());

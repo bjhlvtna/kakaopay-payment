@@ -14,17 +14,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(EncryptCardInfoConverter.class)
-class PaymentRepositoryTest {
+class PaymentReqRepositoryTest {
 
     @Autowired
     private PaymentRepository paymentRepository;
-    @Autowired
-    private PaymentCardInfoRepository paymentCardInfoRepository;
 
     @Test
     public void givenManagementNumber_whenFindByLatestPayment_thenCancel() {
