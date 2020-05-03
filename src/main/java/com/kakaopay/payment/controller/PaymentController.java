@@ -28,7 +28,7 @@ public class PaymentController {
     @ApiOperation(value = "결제 API")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(path = "/payments", consumes = "application/json; charset=UTF-8")
-    public String createPayment(@RequestBody @Valid PaymentDto.PaymentReq paymentReq) throws Exception {
+    public PaymentDto.TransactionRes createPayment(@RequestBody @Valid PaymentDto.PaymentReq paymentReq) throws Exception {
         return this.paymentService.payProcess(paymentReq);
     }
 
@@ -36,13 +36,13 @@ public class PaymentController {
     // TODO: path param & request body
     @ResponseStatus(HttpStatus.OK)
     @PutMapping(path = "/payments/cancel", consumes = "application/json; charset=UTF-8")
-    public String updatePayment(@RequestBody @Valid PaymentDto.CancelReq cancelReq) throws Exception {
+    public PaymentDto.TransactionRes updatePayment(@RequestBody @Valid PaymentDto.CancelReq cancelReq) throws Exception {
         return this.paymentService.cancelProcess(cancelReq);
     }
 
     @ApiOperation(value = "결제 조회 API")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "managementNumber", value = "결제 관리 번호", required = true, dataType = "string", paramType = "path")
+            @ApiImplicitParam(name = "managementNumber", value = "결제 관리 번호", required = true, dataType = "string", paramType = "path")
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/payments/{managementNumber}", produces = "application/json; charset=UTF-8")

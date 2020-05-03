@@ -29,14 +29,14 @@ public class CommonTest {
     public void maskTest() {
 //        String ccNumber = "123232323767";
         String ccNumber = "1232323237671000";
-        int repeatCount = ccNumber.length()-6-3;
-        String msk = StringUtils.overlay(ccNumber, StringUtils.repeat("X", repeatCount), 6, ccNumber.length()-3);
+        int repeatCount = ccNumber.length() - 6 - 3;
+        String msk = StringUtils.overlay(ccNumber, StringUtils.repeat("X", repeatCount), 6, ccNumber.length() - 3);
         System.out.println(ccNumber);
         System.out.println(msk);
     }
 
     @Test
-    public void formatterTest(){
+    public void formatterTest() {
         TelegramFormatter.Item dataLength = TelegramFormatter.Item.DATA_LENGTH;
 
         System.out.println(dataLength.format(10));

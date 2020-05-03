@@ -30,13 +30,13 @@ class PaymentReqRepositoryTest {
         String cancelManagementNumber = "R1KRNGTuHMsW4vaiE3Hy";
 
         PaymentCardInfo paymentCardInfo = PaymentCardInfo.builder()
-                        .paymentID(managementNumber)
-                        .cardInfo(CardInfo.builder()
-                                .cardNumber("0123456789")
-                                .validity("0325")
-                                .cvc("777")
-                                .build())
-                        .build();
+                .paymentID(managementNumber)
+                .cardInfo(CardInfo.builder()
+                        .cardNumber("0123456789")
+                        .validity("0325")
+                        .cvc("777")
+                        .build())
+                .build();
 
         Payment payment = Payment.builder()
                 .managementNumber(managementNumber)

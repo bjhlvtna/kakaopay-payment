@@ -1,6 +1,5 @@
 package com.kakaopay.payment.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.kakaopay.payment.common.PaymentType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;

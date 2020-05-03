@@ -1,12 +1,15 @@
 package com.kakaopay.payment.component;
 
 import com.kakaopay.payment.common.TelegramFormatter;
+import com.kakaopay.payment.exception.TelegramTransferException;
 import com.kakaopay.payment.model.CardCompany;
 import com.kakaopay.payment.model.Payment;
 import com.kakaopay.payment.repository.CardCompanyRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.security.GeneralSecurityException;
 
 @Slf4j
 @Service
@@ -19,15 +22,19 @@ public class TelegramTransfer {
         this.cardCompanyRepository = cardCompanyRepository;
     }
 
-    // TODO: 결과에 따라 Exception throw
     // 무조건 카드사에 전문 송신은 성공으로 가정
-    public boolean transfer(Payment payment) throws Exception {
-        log.info("[TELEGRAM] {}", generateTelegram(payment));
-        this.cardCompanyRepository.save(generateTelegram(payment));
+    public boolean transfer(Payment payment) {
+        try {
+            CardCompany telegram = generateTelegram(payment);
+            log.debug("[TELEGRAM] {}", telegram.toString());
+            this.cardCompanyRepository.save(telegram);
+        } catch (GeneralSecurityException e) {
+            throw new TelegramTransferException(e);
+        }
         return true;
     }
 
-    private CardCompany generateTelegram(Payment payment) throws Exception {
+    private CardCompany generateTelegram(Payment payment) throws GeneralSecurityException {
         return TelegramFormatter.format(payment);
     }
 }

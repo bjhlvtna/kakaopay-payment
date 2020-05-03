@@ -1,7 +1,10 @@
 package com.kakaopay.payment.model;
 
 import com.kakaopay.payment.model.converter.EncryptCardInfoConverter;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
@@ -31,7 +34,7 @@ public class PaymentCardInfo implements Serializable {
     @Column(name = "encrypt_card_info", updatable = false)
     @Convert(converter = EncryptCardInfoConverter.class)
     private CardInfo cardInfo;
-//    private EncryptCardInfo encryptCardInfo;
+    //    private EncryptCardInfo encryptCardInfo;
     // 생성일자
     @CreationTimestamp
     @Column(name = "create_time_at", nullable = false)

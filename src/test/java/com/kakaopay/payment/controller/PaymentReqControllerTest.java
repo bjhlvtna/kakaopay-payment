@@ -16,11 +16,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -31,14 +28,18 @@ class PaymentReqControllerTest {
 
     private static final String PATH = "/api/v1";
 
+    private static final String MANAGEMENT_NUMBER_PAY = "KtwnKfUPiirkl96YMPsM";
+    private static final String MANAGEMENT_NUMBER_CANCEL = "R1KRNGTuHMsW4vaiE3Hy";
+
     @Autowired
     private MockMvc mockMvc;
     @MockBean
     private PaymentService paymentService;
 
+    // TODO: dto valid check test 추가
     // 결제
     @Test
-    public void givenPaymentDto_whenCreatePayment_thenSuccess() throws Exception {
+    public void givenValidPaymentDto_whenCreatePayment_thenSuccess() throws Exception {
 
         PaymentDto.PaymentReq paymentReq = PaymentDto.PaymentReq.builder()
                 .cardNumber("0123456789")
@@ -48,25 +49,88 @@ class PaymentReqControllerTest {
                 .amount(10000L)
                 .build();
 
-        when(paymentService.process(any())).thenReturn("KtwnKfUPiirkl96YMPsM");
+        when(paymentService.process(any())).thenReturn(MANAGEMENT_NUMBER_PAY);
 
         this.mockMvc.perform(
                 post(String.format("%s/%s", PATH, "payments"))
-                .content(asJsonString(paymentReq))
-                .contentType(MediaType.APPLICATION_JSON))
+                        .content(asJsonString(paymentReq))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isCreated());
+    }
+
+    @Test
+    public void givenInvalidCvc_whenCreatePayment_thenBadRequest() throws Exception {
+
+        PaymentDto.PaymentReq paymentReq = PaymentDto.PaymentReq.builder()
+                .cardNumber("0123456789")
+                .validity("0325")
+                .cvc("7773")
+                .installmentMonth(0)
+                .amount(10000L)
+                .build();
+
+        when(paymentService.process(any())).thenReturn(MANAGEMENT_NUMBER_PAY);
+
+        this.mockMvc.perform(
+                post(String.format("%s/%s", PATH, "payments"))
+                        .content(asJsonString(paymentReq))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void givenInvalidCardNumber_whenCreatePayment_thenBadRequest() throws Exception {
+
+        PaymentDto.PaymentReq paymentReq = PaymentDto.PaymentReq.builder()
+                .cardNumber("012345678")
+                .validity("0325")
+                .cvc("7773")
+                .installmentMonth(0)
+                .amount(10000L)
+                .build();
+
+        when(paymentService.process(any())).thenReturn(MANAGEMENT_NUMBER_PAY);
+
+        this.mockMvc.perform(
+                post(String.format("%s/%s", PATH, "payments"))
+                        .content(asJsonString(paymentReq))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void givenInvalidValidity_whenCreatePayment_thenBadRequest() throws Exception {
+
+        PaymentDto.PaymentReq paymentReq = PaymentDto.PaymentReq.builder()
+                .cardNumber("0123456789")
+                .validity("032025")
+                .cvc("777")
+                .installmentMonth(0)
+                .amount(10000L)
+                .build();
+
+        when(paymentService.process(any())).thenReturn(MANAGEMENT_NUMBER_PAY);
+
+        this.mockMvc.perform(
+                post(String.format("%s/%s", PATH, "payments"))
+                        .content(asJsonString(paymentReq))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
     }
 
     @Test
     public void givenCancelDto_whenUpdatePayment_thenSuccess() throws Exception {
 
         PaymentDto.CancelReq cancelReq = PaymentDto.CancelReq.builder()
-                .managementNumber("KtwnKfUPiirkl96YMPsM")
+                .managementNumber(MANAGEMENT_NUMBER_PAY)
                 .amount(10000L)
                 .build();
 
-        when(paymentService.process(any())).thenReturn("R1KRNGTuHMsW4vaiE3Hy");
+        when(paymentService.process(any())).thenReturn(MANAGEMENT_NUMBER_CANCEL);
 
         this.mockMvc.perform(
                 put(String.format("%s/%s", PATH, "payments/cancel"))
@@ -79,21 +143,19 @@ class PaymentReqControllerTest {
     @Test
     public void givenManagementNumber_whenGetPayment_thenResponseDtoPayment() throws Exception {
 
-        String managementNumber = "KtwnKfUPiirkl96YMPsM";
-
         PaymentDto.PaymentRes response = PaymentDto.PaymentRes.builder()
                 .cardNumber("0123456789")
                 .validity("0325")
                 .cvc("777")
                 .paymentType(PaymentType.PAYMENT)
                 .amount(10000L)
-                .paymentId(managementNumber)
+                .paymentId(MANAGEMENT_NUMBER_PAY)
                 .build();
 
         when(paymentService.findByManagementNumber(any())).thenReturn(response);
 
         this.mockMvc.perform(
-                get(String.format("%s/%s/%s", PATH, "payments", managementNumber)))
+                get(String.format("%s/%s/%s", PATH, "payments", MANAGEMENT_NUMBER_PAY)))
                 .andDo(print())
                 .andExpect(status().isOk());
     }

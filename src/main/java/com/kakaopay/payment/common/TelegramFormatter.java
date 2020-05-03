@@ -5,16 +5,18 @@ import com.kakaopay.payment.model.CardInfo;
 import com.kakaopay.payment.model.Payment;
 import lombok.Getter;
 
+import java.security.GeneralSecurityException;
+
 public class TelegramFormatter {
 
     public enum DataType {
         // 숫자 / 우측으로 정렬, 빈 자리 공백, ex) 4자리 숫자 : 3 -> "___3"
-        // 숫자 / 우측으로 정렬, 빈 자리 0, ex) 4자리 숫자(0) : 3 -> "0003"
-        // 숫자 / 좌측으로 정렬, 빈 자리 공백, ex) 4자리 숫자(L) : 3 -> "3___"
-        // 문자 / 좌측으로 정렬, 빈 자리 공백, ex) 10자리 문자 : HOMEWORK -> "HOMEWORK__"
         NUMBER("NUMBER", "%dd"),
+        // 숫자 / 우측으로 정렬, 빈 자리 0, ex) 4자리 숫자(0) : 3 -> "0003"
         NUMBER_0("NUMBER_O", "0%dd"),
+        // 숫자 / 좌측으로 정렬, 빈 자리 공백, ex) 4자리 숫자(L) : 3 -> "3___"
         NUMBER_L("NUMBER_L", "-%dd"),
+        // 문자 / 좌측으로 정렬, 빈 자리 공백, ex) 10자리 문자 : HOMEWORK -> "HOMEWORK__"
         TEXT("TEXT", "-%ds");
 
         @Getter
@@ -61,7 +63,7 @@ public class TelegramFormatter {
         private int length;
         private String dataFormat;
 
-        Item (String name, int length, DataType dataType) {
+        Item(String name, int length, DataType dataType) {
             this.name = name;
             this.length = length;
             this.dataFormat = "%" + String.format(dataType.getAlignFormat(), length);
@@ -80,7 +82,7 @@ public class TelegramFormatter {
         }
     }
 
-    public static CardCompany format(Payment payment) throws Exception {
+    public static CardCompany format(Payment payment) throws GeneralSecurityException {
         StringBuilder telegramBuffer = new StringBuilder();
         telegramBuffer.append(Item.DATA_CLASSIFICATION.format(payment.getPaymentType().name()));
         telegramBuffer.append(Item.MANAGEMENT_NUMBER.format(payment.getManagementNumber()));

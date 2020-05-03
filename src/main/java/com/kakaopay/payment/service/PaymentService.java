@@ -2,16 +2,17 @@ package com.kakaopay.payment.service;
 
 import com.kakaopay.payment.component.TelegramTransfer;
 import com.kakaopay.payment.dto.PaymentDto;
+import com.kakaopay.payment.exception.CancelAmountException;
 import com.kakaopay.payment.model.CardInfo;
 import com.kakaopay.payment.model.Payment;
 import com.kakaopay.payment.model.PaymentCardInfo;
 import com.kakaopay.payment.repository.PaymentRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -39,16 +40,16 @@ public class PaymentService {
     }
 
     // TODO: 카드사 전송 먼저 하고 저장? 트랜젝션 고민 필요
-    public String process(Payment payment) throws Exception {
+    public String process(Payment payment) {
         if (this.telegramTransfer.transfer(payment)) {
             payment.setTransferSuccess(true);
         }
         return this.paymentRepository.save(payment).getManagementNumber();
     }
 
-//    @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
+    //    @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
 //    @Transactional
-    public String payProcess(PaymentDto.PaymentReq paymentReq) throws Exception {
+    public PaymentDto.TransactionRes payProcess(PaymentDto.PaymentReq paymentReq) throws Exception {
 
         Payment payment = (Payment) convert(paymentReq, Payment.class);
         payment.setManagementNumber(generateManagementNumber());
@@ -66,12 +67,15 @@ public class PaymentService {
         if (this.telegramTransfer.transfer(payment)) {
             payment.setTransferSuccess(true);
         }
-        return this.paymentRepository.save(payment).getManagementNumber();
+        return PaymentDto.TransactionRes.builder()
+                .managementNumber(this.paymentRepository.save(payment).getManagementNumber())
+                .additionalInfo(StringUtils.EMPTY)
+                .build();
 //        return process(payment);
     }
 
-//    @Transactional
-    public String cancelProcess(PaymentDto.CancelReq cancelReq) throws Exception {
+    //    @Transactional
+    public PaymentDto.TransactionRes cancelProcess(PaymentDto.CancelReq cancelReq) throws CancelAmountException {
         Payment cancel = (Payment) convert(cancelReq, Payment.class);
         cancel.setManagementNumber(generateManagementNumber());
         cancel.setValueAddedTax(calculateValueAddedTax(cancel.getAmount(), cancel.getValueAddedTax()));
@@ -79,7 +83,7 @@ public class PaymentService {
         Payment prevPayment = this.paymentRepository.findByLatestPayment(cancel.getOriginManagementNumber());
         // valid check
         if (!validCancelAmount(prevPayment.getAmount(), prevPayment.getValueAddedTax(), cancel.getAmount(), cancel.getValueAddedTax())) {
-            throw new Exception("");
+            throw new CancelAmountException();
         }
         cancel.setPaymentCardInfo(prevPayment.getPaymentCardInfo());
         cancel.setInstallmentMonth(DEFAULT_INSTALLMENT_MONTH);
@@ -89,11 +93,15 @@ public class PaymentService {
         if (this.telegramTransfer.transfer(cancel)) {
             cancel.setTransferSuccess(true);
         }
-        return this.paymentRepository.save(cancel).getManagementNumber();
+        return PaymentDto.TransactionRes.builder()
+                .managementNumber(this.paymentRepository.save(cancel).getManagementNumber())
+                .additionalInfo(StringUtils.EMPTY)
+                .build();
+//        return this.paymentRepository.save(cancel).getManagementNumber();
 //        return process(cancel);
     }
 
-    public int count(){
+    public int count() {
         return this.paymentRepository.findAll().size();
     }
 
@@ -129,13 +137,12 @@ public class PaymentService {
      * 부가가치세는 결제금액보다 클 수 없습니다.
      * 결제금액이 1,000원일 때, 부가가치세는 0원일 수 있습니다
      */
-    // ddd 관점에서는 entity로 로직을 넘긴다
-    private int calculateValueAddedTax(Long amount, Integer valueAddedTax) throws Exception {
+    private int calculateValueAddedTax(Long amount, Integer valueAddedTax) throws CancelAmountException {
         if (valueAddedTax != null && amount > valueAddedTax) {
             return valueAddedTax;
         }
         if (valueAddedTax != null && amount < valueAddedTax) {
-            throw new Exception("");
+            throw new CancelAmountException();
         }
         return Math.round(amount / VALUE_ADDED_TAX_RATE);
     }

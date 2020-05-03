@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
+import java.security.GeneralSecurityException;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -19,11 +21,11 @@ public class CardInfo {
 
     // TODO: modelMapper mapping
     public String getMaskingCardNumber() {
-        int repeatCount = cardNumber.length()-6-3;
-        return StringUtils.overlay(cardNumber, StringUtils.repeat("X", repeatCount), 6, cardNumber.length()-3);
+        int repeatCount = cardNumber.length() - 6 - 3;
+        return StringUtils.overlay(cardNumber, StringUtils.repeat("X", repeatCount), 6, cardNumber.length() - 3);
     }
 
-    public String toEncryptString() throws Exception {
+    public String toEncryptString() throws GeneralSecurityException {
         return EncryptionUtils.encrypt(toString());
     }
 

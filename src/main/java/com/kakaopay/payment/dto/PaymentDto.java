@@ -76,6 +76,16 @@ public class PaymentDto {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class TransactionRes {
+        private String managementNumber;
+        private String additionalInfo;
+
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class PaymentRes {
         //- 관리번호 ( UUID, 20자리 )
         private String paymentId;
@@ -88,6 +98,6 @@ public class PaymentDto {
 
         private Long amount;
         //- 추가 필드 ( optional )
-        private String externalInfo;
+        private String additionalInfo;
     }
 }
