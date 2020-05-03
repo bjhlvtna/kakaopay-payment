@@ -49,7 +49,8 @@ public class CommonTest {
 
     @Test
     public void valueAddedTaxTest1() throws Exception {
-        System.out.println(ValueAddedTaxUtils.calculate(1000L, 0));
+        System.out.println(ValueAddedTaxUtils.calculate(3300L, null));
+        System.out.println(ValueAddedTaxUtils.calculate(1000L, null));
     }
 
     @Test
