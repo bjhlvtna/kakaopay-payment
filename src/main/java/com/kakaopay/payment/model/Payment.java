@@ -13,7 +13,6 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-// TODO: builder 제거 mapper 로 변경
 @Data
 @Entity
 @Builder
@@ -47,9 +46,12 @@ public class Payment {
     @Column(name = "value_added_tax", nullable = true)
     private Integer valueAddedTax;
     // 원거래관리번호 (FK)
-    @ManyToOne(targetEntity=PaymentCardInfo.class, fetch=FetchType.LAZY)
+    @ManyToOne(targetEntity = PaymentCardInfo.class, cascade = CascadeType.ALL)
     @JoinColumn(referencedColumnName = "payment_id")
     private PaymentCardInfo paymentCardInfo;
+    // 전문 전송 성공 여부
+    @Column(name = "transfer_success", columnDefinition = "BOOLEAN DEFAULT false", nullable = false)
+    private boolean transferSuccess;
     // 생성일자
     @CreationTimestamp
     @Column(name = "create_time_at", nullable = false)

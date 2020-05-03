@@ -1,10 +1,8 @@
 package com.kakaopay.payment.service;
 
-import com.kakaopay.payment.common.ValueAddedTaxUtils;
+import com.kakaopay.payment.common.PaymentType;
 import com.kakaopay.payment.component.TelegramTransfer;
 import com.kakaopay.payment.model.Payment;
-import com.kakaopay.payment.model.PaymentCardInfo;
-import com.kakaopay.payment.repository.PaymentCardInfoRepository;
 import com.kakaopay.payment.repository.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,43 +10,33 @@ import org.springframework.stereotype.Service;
 @Service
 public class PaymentService {
 
+    private static final float VALUE_ADDED_TAX_RATE = 11F;
+    private static final int DEFAULT_INSTALLMENT_MONTH = 0;
+
     private PaymentRepository paymentRepository;
-    private PaymentCardInfoRepository paymentCardInfoRepository;
     private TelegramTransfer telegramTransfer;
 
     @Autowired
-    public PaymentService(PaymentRepository paymentRepository, PaymentCardInfoRepository paymentCardInfoRepository, TelegramTransfer telegramTransfer) {
+    public PaymentService(PaymentRepository paymentRepository, TelegramTransfer telegramTransfer) {
         this.paymentRepository = paymentRepository;
-        this.paymentCardInfoRepository = paymentCardInfoRepository;
         this.telegramTransfer = telegramTransfer;
     }
 
     public Payment findByManagementNumber(String managementNumber) {
-        return paymentRepository.findByLatelyPayment(managementNumber);
+        return paymentRepository.findByLatestPayment(managementNumber);
     }
 
     // TODO: 카드사 전송 먼저 하고 저장? 트랜젝션 고민 필요
-    // 일단 저장 되는거 확인 먼저 하자
     public String process(Payment payment) throws Exception {
 
-        // TODO : 트랜젝션 문제...
-        setPaymentAttribute(payment);
-        this.telegramTransfer.transfer(payment);
-        return this.paymentRepository.save(payment).getManagementNumber();
-    }
-
-    private void setPaymentAttribute(Payment payment) throws Exception {
-        payment.setValueAddedTax(ValueAddedTaxUtils.calculate(payment.getAmount(), payment.getValueAddedTax()));
-        switch (payment.getPaymentType()) {
-            case PAYMENT:
-                this.paymentCardInfoRepository.save(payment.getPaymentCardInfo());
-                break;
-            case CANCEL:
-                cancelProcess(payment);
-                break;
-            default:
-                throw new UnsupportedOperationException("");
+        payment.setValueAddedTax(calculateValueAddedTax(payment.getAmount(), payment.getValueAddedTax()));
+        if (PaymentType.CANCEL == payment.getPaymentType()) {
+            cancelProcess(payment);
         }
+        if (this.telegramTransfer.transfer(payment)) {
+            payment.setTransferSuccess(true);
+        }
+        return this.paymentRepository.save(payment).getManagementNumber();
     }
 
     /*
@@ -65,16 +53,32 @@ public class PaymentService {
      */
     private void cancelProcess(Payment payment) throws Exception {
         // 가장 최근 결제 내용 받아옴
-//        Payment prevPayment = this.paymentRepository.findByManagementNumber(payment.getOriginManagementNumber());
-        Payment prevPayment = this.paymentRepository.findByLatelyPayment(payment.getOriginManagementNumber());
+        Payment prevPayment = this.paymentRepository.findByLatestPayment(payment.getOriginManagementNumber());
         // valid check
         if (!validCancelAmount(prevPayment.getAmount(), prevPayment.getValueAddedTax(), payment.getAmount(), payment.getValueAddedTax())) {
             throw new Exception("");
         }
         payment.setPaymentCardInfo(prevPayment.getPaymentCardInfo());
-        payment.setInstallmentMonth(0);
+        payment.setInstallmentMonth(DEFAULT_INSTALLMENT_MONTH);
         payment.setAmount(prevPayment.getAmount() - payment.getAmount());
         payment.setValueAddedTax(prevPayment.getValueAddedTax() - payment.getValueAddedTax());
+    }
+
+    /*
+     * optional 데이터이므로 값을 받지 않은 경우, 자동계산 합니다.
+     * 자동계산 수식 : 결제금액 / 11, 소수점이하 반올림
+     * 결제금액이 1,000원일 경우, 자동계산된 부가가치세는 91원입니다.
+     * 부가가치세는 결제금액보다 클 수 없습니다.
+     * 결제금액이 1,000원일 때, 부가가치세는 0원일 수 있습니다
+     */
+    private int calculateValueAddedTax(Long amount, Integer valueAddedTax) throws Exception {
+        if (valueAddedTax != null && amount > valueAddedTax) {
+            return valueAddedTax;
+        }
+        if (valueAddedTax != null && amount < valueAddedTax) {
+            throw new Exception("");
+        }
+        return Math.round(amount / VALUE_ADDED_TAX_RATE);
     }
 
     private boolean validCancelAmount(long prevAmount, int prevTax, long amount, int tax) {

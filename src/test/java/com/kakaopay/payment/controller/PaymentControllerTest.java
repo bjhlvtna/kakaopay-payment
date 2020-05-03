@@ -112,9 +112,6 @@ class PaymentControllerTest {
                 .andExpect(status().isOk());
     }
 
-
-
-
     private static String asJsonString(final Object obj) {
         try {
             return new ObjectMapper().writeValueAsString(obj);

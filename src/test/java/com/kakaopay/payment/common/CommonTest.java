@@ -43,17 +43,6 @@ public class CommonTest {
     }
 
     @Test
-    public void valueAddedTaxTest() throws Exception {
-        System.out.println(ValueAddedTaxUtils.calculate(1000L, null));
-    }
-
-    @Test
-    public void valueAddedTaxTest1() throws Exception {
-        System.out.println(ValueAddedTaxUtils.calculate(3300L, null));
-        System.out.println(ValueAddedTaxUtils.calculate(1000L, null));
-    }
-
-    @Test
     public void tmpTest() {
         PaymentCardInfo cardInfo = PaymentCardInfo.builder().paymentID("12345678901234567890").build();
         System.out.println(cardInfo.getPaymentID());
