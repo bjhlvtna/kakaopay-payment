@@ -407,66 +407,55 @@ TransactionRes
 
 #### payment : 결제 정보 저장 테이블 (payment_card_info table과 many to one 관계 )
 
-| Column                   | Type         | Description                |
-| ------------------------ | ------------ | -------------------------- |
-| id                       | bigint(20)   | auto_increment             |
-| amount                   | bigint(20)   | 결제 금액                  |
-| Installment_month        | int(11)      | 할부 정보                  |
-| Management_number        | varchar(20)  | 관리 번호                  |
-| Origin_management_number | varchar(20)  | 원거래 관리 번호           |
-| payment_type             | varchar(255) | 결제 구분을 위한 enum 값   |
-| transfer_success         | tinyint(1)   | 카드사 전문 송신 성공 여부 |
-| value_added_tax          | int(11)      | 부가세 정보                |
-| payment_card_info        | varchar(20)  | payment_card_info table FK |
-| create_time_at           | datetime     | 생성일시                   |
+| Column                   | Type ( Mysql ) | Description                |
+| ------------------------ | -------------- | -------------------------- |
+| id                       | bigint(20)     | auto_increment             |
+| amount                   | bigint(20)     | 결제 금액                  |
+| Installment_month        | int(11)        | 할부 정보                  |
+| Management_number        | varchar(20)    | 관리 번호                  |
+| Origin_management_number | varchar(20)    | 원거래 관리 번호           |
+| payment_type             | varchar(255)   | 결제 구분을 위한 enum 값   |
+| transfer_success         | tinyint(1)     | 카드사 전문 송신 성공 여부 |
+| value_added_tax          | int(11)        | 부가세 정보                |
+| payment_card_info        | varchar(20)    | payment_card_info table FK |
+| create_time_at           | datetime       | 생성일시                   |
 
 #### payment_card_info : 카드 정보 저장 테이블 
 
-| Column            | Type         | Description               |
-| ----------------- | ------------ | ------------------------- |
-| id                | bigint(20)   | auto_increment            |
-| encrypt_card_info | varchar(255) | 암호화되어 있는 카드 정보 |
-| payment_id        | varchar(20)  | 관리번호와 맵핑           |
-| create_time_at    | datetime     | 생성일시                  |
+| Column            | Type ( Mysql ) | Description               |
+| ----------------- | -------------- | ------------------------- |
+| id                | bigint(20)     | auto_increment            |
+| encrypt_card_info | varchar(255)   | 암호화되어 있는 카드 정보 |
+| payment_id        | varchar(20)    | 관리번호와 맵핑           |
+| create_time_at    | datetime       | 생성일시                  |
 
 #### card_company : 카드사 전송 전문 저장 테이블 
 
-| Column            | Type        | Description        |
-| ----------------- | ----------- | ------------------ |
-| management_number | varchar(20) | 관리번호           |
-| telegram          | Text        | 규약에 맞춰진 전문 |
-| create_time_at    | datetime    | 생성일시           |
+| Column            | Type ( Mysql ) | Description        |
+| ----------------- | -------------- | ------------------ |
+| management_number | varchar(20)    | 관리번호           |
+| telegram          | Text           | 규약에 맞춰진 전문 |
+| create_time_at    | datetime       | 생성일시           |
 
 ---
 
 ## 문제 해결
 
 1. API 구현
-
    * 명세에 정의 되어 있는 필수/옵션 필드가 정의 된 `Dto` 생성 후 내부 `Entity`로 변환 하기 위해 `ModelMapper`를 사용함
      * 결제, 결제취소, 조회 `requestDto`에 `mapping` 되는 `PropertyMap`적용
-
-   
-
 2. 관리 번호 생성 (unique id, 20자리) 
-
    * `org.apache.commons.lang3.RandomStringUtils`  을 통해 숫자/문자 생성
      * 사용된 알고리즘 검증 진행 하지 못 함.
-
 3. 암/복호화 
-
    * 대칭형 암호 알고리즘 중 블록암호 알고리즘 방식인 AES128 암호화 적용
-
 4. 카드사 전송 전문 셍성 ( string 데이터 )
-
    * 전문에 사용하는 데이터 타입 `enum` 정의
    * 전문 규약에 맞는 필드 `name, length, data type` 정의
    * 정의된 전문 규약을 통해 정해진 `String 전문 생성` 
-
 5. (선택) 부분 취소 API Test case **통과**
-
-   * TODO
-
+   * 결제 취소 API 공통으로 사용하여 부분 취소 구현
+   * 어플리케이션 실행후 Test case 실행 성공 / Junit에서 실패
 6. (선택) Multi Thread 환경에 대비
-
-   * Todo: 
+   * Transactional 을 이용하여 시도 해 보았지만 실패
+   * 카드번호/결제관리번호 를 service layer에서 캐싱을 동기화 해서 구현 하려 했지만 명세의 의도가 아니라고 판단하여 구현 하지 않음
