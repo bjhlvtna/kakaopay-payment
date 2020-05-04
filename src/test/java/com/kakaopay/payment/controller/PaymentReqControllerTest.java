@@ -49,7 +49,9 @@ class PaymentReqControllerTest {
                 .amount(10000L)
                 .build();
 
-        when(paymentService.process(any())).thenReturn(MANAGEMENT_NUMBER_PAY);
+        when(paymentService.payProcess(any())).thenReturn(PaymentDto.TransactionRes.builder()
+                .managementNumber(MANAGEMENT_NUMBER_PAY)
+                .build());
 
         this.mockMvc.perform(
                 post(String.format("%s/%s", PATH, "payments"))
@@ -70,7 +72,9 @@ class PaymentReqControllerTest {
                 .amount(10000L)
                 .build();
 
-        when(paymentService.process(any())).thenReturn(MANAGEMENT_NUMBER_PAY);
+        when(paymentService.payProcess(any())).thenReturn(PaymentDto.TransactionRes.builder()
+                .managementNumber(MANAGEMENT_NUMBER_PAY)
+                .build());
 
         this.mockMvc.perform(
                 post(String.format("%s/%s", PATH, "payments"))
@@ -91,7 +95,9 @@ class PaymentReqControllerTest {
                 .amount(10000L)
                 .build();
 
-        when(paymentService.process(any())).thenReturn(MANAGEMENT_NUMBER_PAY);
+        when(paymentService.payProcess(any())).thenReturn(PaymentDto.TransactionRes.builder()
+                .managementNumber(MANAGEMENT_NUMBER_PAY)
+                .build());
 
         this.mockMvc.perform(
                 post(String.format("%s/%s", PATH, "payments"))
@@ -112,7 +118,9 @@ class PaymentReqControllerTest {
                 .amount(10000L)
                 .build();
 
-        when(paymentService.process(any())).thenReturn(MANAGEMENT_NUMBER_PAY);
+        when(paymentService.payProcess(any())).thenReturn(PaymentDto.TransactionRes.builder()
+                .managementNumber(MANAGEMENT_NUMBER_PAY)
+                .build());
 
         this.mockMvc.perform(
                 post(String.format("%s/%s", PATH, "payments"))
@@ -130,7 +138,9 @@ class PaymentReqControllerTest {
                 .amount(10000L)
                 .build();
 
-        when(paymentService.process(any())).thenReturn(MANAGEMENT_NUMBER_CANCEL);
+        when(paymentService.cancelProcess(any())).thenReturn(PaymentDto.TransactionRes.builder()
+                .managementNumber(MANAGEMENT_NUMBER_PAY)
+                .build());
 
         this.mockMvc.perform(
                 put(String.format("%s/%s", PATH, "payments/cancel"))

@@ -79,7 +79,6 @@ public class PaymentDto {
     public static class TransactionRes {
         private String managementNumber;
         private String additionalInfo;
-
     }
 
     @Data

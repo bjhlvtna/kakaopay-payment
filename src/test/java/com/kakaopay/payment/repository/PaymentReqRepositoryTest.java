@@ -64,6 +64,5 @@ class PaymentReqRepositoryTest {
         Payment actual = this.paymentRepository.findByLatestPayment(managementNumber);
 
         assertThat(actual.getManagementNumber(), is(cancelManagementNumber));
-        System.out.println(actual.getPaymentCardInfo().getPaymentID());
     }
 }

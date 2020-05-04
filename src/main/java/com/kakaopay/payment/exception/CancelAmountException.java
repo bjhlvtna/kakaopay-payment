@@ -7,6 +7,9 @@ public class CancelAmountException extends RuntimeException {
     public CancelAmountException() {
         super(MESSAGE);
     }
+    public CancelAmountException(String message) {
+        super(message);
+    }
 
     public CancelAmountException(Throwable cause) {
         super(MESSAGE, cause);

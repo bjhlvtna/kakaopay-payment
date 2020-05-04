@@ -29,12 +29,9 @@ public class PaymentCardInfo implements Serializable {
     @Column(name = "payment_id", nullable = false, unique = true, length = 20, updatable = false)
     private String paymentID;
     // 암호화된 카드정보
-    // TODO: class 화 toString 마스킹 처리
-//    @Column(name = "encrypt_card_info", nullable = false, updatable = false)
     @Column(name = "encrypt_card_info", updatable = false)
     @Convert(converter = EncryptCardInfoConverter.class)
     private CardInfo cardInfo;
-    //    private EncryptCardInfo encryptCardInfo;
     // 생성일자
     @CreationTimestamp
     @Column(name = "create_time_at", nullable = false)

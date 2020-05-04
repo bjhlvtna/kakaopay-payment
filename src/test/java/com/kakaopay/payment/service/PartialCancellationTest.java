@@ -24,14 +24,14 @@ public class PartialCancellationTest {
     private static final String CVC = "777";
 
     @Autowired
-    PaymentService paymentService;
-    String originManagementNumber;
+    private PaymentService paymentService;
+    private String originManagementNumber;
 
 //    @Test
 //    public void partialCancelCase1() throws Exception {
 //
 //        // 결제 / 11,000 / 1,000 / 성공 / 11,000 / 1,000 / 11,000(1,000)원 결제 성공
-//        PaymentDto.PaymentRes actual = pay(11000L, 1000);
+//        Payment actual = pay(11000L, 1000);
 //        assertThat(actual.getAmount(), is(11000L));
 //        assertThat(actual.getValueAddedTax(), is(1000));
 //
@@ -70,7 +70,6 @@ public class PartialCancellationTest {
 //    public void partialCancelCase2() throws Exception {
 //
 //        // 결제 / 20,000 / 909 / 성공 / 20,000 / 909 / 20,000(909)원 결제 성공
-////        PaymentDto.PaymentRes actual = pay(20000L, 909);
 //        Payment actual = pay(20000L, 909);
 //        assertThat(actual.getAmount(), is(20000L));
 //        assertThat(actual.getValueAddedTax(), is(909));
@@ -91,53 +90,49 @@ public class PartialCancellationTest {
 //        assertThat(actual.getValueAddedTax(), is(0));
 //    }
 
-    @Test
-    public void partialCancelCase3() throws Exception {
-        // 결제 / 20,000 / null / 성공 / 20,000 / 1,818 / 20,000원 결제 성공, 부가가치세 (1,818) 자동계산
-//        PaymentDto.PaymentRes actual = pay(20000L, null);
-        Payment actual = pay(20000L, null);
-        assertThat(actual.getAmount(), is(20000L));
-        assertThat(actual.getValueAddedTax(), is(1818));
+//    @Test
+//    public void partialCancelCase3() throws Exception {
+//        // 결제 / 20,000 / null / 성공 / 20,000 / 1,818 / 20,000원 결제 성공, 부가가치세 (1,818) 자동계산
+//        Payment actual = pay(20000L, null);
+//        assertThat(actual.getAmount(), is(20000L));
+//        assertThat(actual.getValueAddedTax(), is(1818));
+//
+//        // 부분 취소 / 10,000 / 1,000 / 성공 /. 10,000 / 818 / 10,000(1,000)원 취소 성공
+//        actual = cancel(10000L, 1000);
+//        assertThat(actual.getAmount(), is(10000L));
+//        assertThat(actual.getValueAddedTax(), is(818));
+//
+//        // 부분 취소 / 10,000 / 909 / 실패 /. 10,000 / 818 / 10,000(909)원 취소하려했으나 남은 부가가치세가 더 작으므로 실패
+//        actual = cancel(10000L, 909);
+//        assertThat(actual.getAmount(), is(10000L));
+//        assertThat(actual.getValueAddedTax(), is(818));
+//
+//        // 부분 취소 / 10,000 /  null / 성공 /. 0 /. 0 / 10,000원 취소, 남은 부가가치세는 818원으로 자동계산되어 성공
+//        actual = cancel(10000L, null);
+//        assertThat(actual.getAmount(), is(0L));
+//        assertThat(actual.getValueAddedTax(), is(0));
+//    }
 
-        // 부분 취소 / 10,000 / 1,000 / 성공 /. 10,000 / 818 / 10,000(1,000)원 취소 성공
-        actual = cancel(10000L, 1000);
-        assertThat(actual.getAmount(), is(10000L));
-        assertThat(actual.getValueAddedTax(), is(818));
-
-        // 부분 취소 / 10,000 / 909 / 실패 /. 10,000 / 818 / 10,000(909)원 취소하려했으나 남은 부가가치세가 더 작으므로 실패
-        actual = cancel(10000L, 909);
-        assertThat(actual.getAmount(), is(10000L));
-        assertThat(actual.getValueAddedTax(), is(818));
-
-        // 부분 취소 / 10,000 /  null / 성공 /. 0 /. 0 / 10,000원 취소, 남은 부가가치세는 818원으로 자동계산되어 성공
-        actual = cancel(10000L, null);
-        assertThat(actual.getAmount(), is(0L));
-        assertThat(actual.getValueAddedTax(), is(0));
-    }
-
-//    private PaymentDto.PaymentRes pay(Long amount, Integer tax) throws Exception {
-    private Payment pay(Long amount, Integer tax) throws Exception {
-        PaymentDto.PaymentReq paymentReq = PaymentDto.PaymentReq.builder()
-                .amount(amount).valueAddedTax(tax).installmentMonth(0)
-                .cardNumber(CARD_NUMBER).validity(VALIDITY).cvc(CVC)
-                .build();
-        PaymentDto.TransactionRes response = this.paymentService.payProcess(paymentReq);
-        this.originManagementNumber = response.getManagementNumber();
-        return this.paymentService.findByRemainPayment(this.originManagementNumber);
-//        return this.paymentService.findByLatestPayment(this.originManagementNumber);
-    }
-
-//    private PaymentDto.PaymentRes cancel(Long amount, Integer tax) {
-    private Payment cancel(Long amount, Integer tax) {
-        PaymentDto.CancelReq cancelReq = PaymentDto.CancelReq.builder()
-                .managementNumber(this.originManagementNumber)
-                .amount(amount).valueAddedTax(tax)
-                .build();
-        try {
-            this.paymentService.cancelProcess(cancelReq);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
-        return this.paymentService.findByRemainPayment(this.originManagementNumber);
-    }
+//    private Payment pay(Long amount, Integer tax) throws Exception {
+//        PaymentDto.PaymentReq paymentReq = PaymentDto.PaymentReq.builder()
+//                .amount(amount).valueAddedTax(tax).installmentMonth(0)
+//                .cardNumber(CARD_NUMBER).validity(VALIDITY).cvc(CVC)
+//                .build();
+//        PaymentDto.TransactionRes response = this.paymentService.payProcess(paymentReq);
+//        this.originManagementNumber = response.getManagementNumber();
+//        return this.paymentService.findByRemainPayment(this.originManagementNumber);
+//    }
+//
+//    private Payment cancel(Long amount, Integer tax) {
+//        PaymentDto.CancelReq cancelReq = PaymentDto.CancelReq.builder()
+//                .managementNumber(this.originManagementNumber)
+//                .amount(amount).valueAddedTax(tax)
+//                .build();
+//        try {
+//            this.paymentService.cancelProcess(cancelReq);
+//        } catch (Exception e) {
+//            log.error(e.getMessage());
+//        }
+//        return this.paymentService.findByRemainPayment(this.originManagementNumber);
+//    }
 }

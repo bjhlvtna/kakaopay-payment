@@ -22,7 +22,6 @@ public class EncryptCardInfoConverter implements AttributeConverter<CardInfo, St
     @SneakyThrows
     @Override
     public CardInfo convertToEntityAttribute(String encryptCardInfo) {
-        // TODO: 우아하게 리펙토링
         String[] tmp = StringUtils.split(EncryptionUtils.decrypt(encryptCardInfo), CARD_INFO_DELIMITER);
         return CardInfo.builder().cardNumber(tmp[0]).validity(tmp[1]).cvc(tmp[2]).build();
     }

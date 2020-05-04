@@ -39,7 +39,7 @@ public class CommonTest {
     public void formatterTest() {
         TelegramFormatter.Item dataLength = TelegramFormatter.Item.DATA_LENGTH;
 
-        System.out.println(dataLength.format(10));
+        System.out.println(dataLength.format("0"));
     }
 
     @Test

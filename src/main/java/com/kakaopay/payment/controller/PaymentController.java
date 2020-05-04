@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
-// TODO: grobal Exception handler
 @Slf4j
 @RestController
 @RequestMapping(path = "/api/v1")
@@ -29,14 +28,15 @@ public class PaymentController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(path = "/payments", consumes = "application/json; charset=UTF-8")
     public PaymentDto.TransactionRes createPayment(@RequestBody @Valid PaymentDto.PaymentReq paymentReq) throws Exception {
+        log.debug("[PaymentReq] {}", paymentReq.toString());
         return this.paymentService.payProcess(paymentReq);
     }
 
     @ApiOperation(value = "결제 취소 API")
-    // TODO: path param & request body
     @ResponseStatus(HttpStatus.OK)
     @PutMapping(path = "/payments/cancel", consumes = "application/json; charset=UTF-8")
     public PaymentDto.TransactionRes updatePayment(@RequestBody @Valid PaymentDto.CancelReq cancelReq) throws Exception {
+        log.debug("[CancelReq] {}", cancelReq.toString());
         return this.paymentService.cancelProcess(cancelReq);
     }
 
@@ -47,6 +47,7 @@ public class PaymentController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/payments/{managementNumber}", produces = "application/json; charset=UTF-8")
     public PaymentDto.PaymentRes getPayment(@PathVariable String managementNumber) throws Exception {
+        log.debug("[GET] {}", managementNumber);
         return this.paymentService.findByManagementNumber(managementNumber);
     }
 }

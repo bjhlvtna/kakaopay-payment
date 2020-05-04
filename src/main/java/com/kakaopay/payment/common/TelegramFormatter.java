@@ -4,18 +4,26 @@ import com.kakaopay.payment.model.CardCompany;
 import com.kakaopay.payment.model.CardInfo;
 import com.kakaopay.payment.model.Payment;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.security.GeneralSecurityException;
 
+@Slf4j
 public class TelegramFormatter {
 
     public enum DataType {
         // 숫자 / 우측으로 정렬, 빈 자리 공백, ex) 4자리 숫자 : 3 -> "___3"
-        NUMBER("NUMBER", "%dd"),
+        NUMBER("NUMBER", "%ds"),
         // 숫자 / 우측으로 정렬, 빈 자리 0, ex) 4자리 숫자(0) : 3 -> "0003"
         NUMBER_0("NUMBER_O", "0%dd"),
         // 숫자 / 좌측으로 정렬, 빈 자리 공백, ex) 4자리 숫자(L) : 3 -> "3___"
-        NUMBER_L("NUMBER_L", "-%dd"),
+        NUMBER_L("NUMBER_L", "-%ds"),
+        //        // 숫자 / 우측으로 정렬, 빈 자리 공백, ex) 4자리 숫자 : 3 -> "___3"
+//        NUMBER("NUMBER", "%dd"),
+//        // 숫자 / 우측으로 정렬, 빈 자리 0, ex) 4자리 숫자(0) : 3 -> "0003"
+//        NUMBER_0("NUMBER_O", "0%dd"),
+//        // 숫자 / 좌측으로 정렬, 빈 자리 공백, ex) 4자리 숫자(L) : 3 -> "3___"
+//        NUMBER_L("NUMBER_L", "-%dd"),
         // 문자 / 좌측으로 정렬, 빈 자리 공백, ex) 10자리 문자 : HOMEWORK -> "HOMEWORK__"
         TEXT("TEXT", "-%ds");
 
@@ -55,7 +63,7 @@ public class TelegramFormatter {
         // 암호 화된 카드 정보 / 문자 / 300 / 카드번호, 유호기 간, cvc 데이터를 안전하게 암호화 / 암/복호화 방식 자유롭게 선택
         ENCRYPT_CART_INFO("ENCRYPT_CART_INFO", 300, DataType.TEXT),
         // 예비 필드 / 문자 / 47 / /
-        EXTRA_FIELD("EXTRA_FIELD", 47, DataType.TEXT);
+        ADDITIONAL_FIELD("EXTRA_FIELD", 47, DataType.TEXT);
 
         @Getter
         private String name;
@@ -72,11 +80,11 @@ public class TelegramFormatter {
         public String format(int data) {
             return String.format(this.dataFormat, data);
         }
-
-        public String format(long data) {
-            return String.format(this.dataFormat, data);
-        }
-
+//
+//        public String format(long data) {
+//            return String.format(this.dataFormat, data);
+//        }
+//
         public String format(String data) {
             return String.format(this.dataFormat, data);
         }
@@ -87,18 +95,19 @@ public class TelegramFormatter {
         telegramBuffer.append(Item.DATA_CLASSIFICATION.format(payment.getPaymentType().name()));
         telegramBuffer.append(Item.MANAGEMENT_NUMBER.format(payment.getManagementNumber()));
         CardInfo cardInfo = payment.getPaymentCardInfo().getCardInfo();
-        telegramBuffer.append(Item.CARD_NUMBER.format(Long.valueOf(cardInfo.getCardNumber())));
+        telegramBuffer.append(Item.CARD_NUMBER.format(cardInfo.getCardNumber()));
         telegramBuffer.append(Item.INSTALLMENT_MONTH.format(payment.getInstallmentMonth()));
-        telegramBuffer.append(Item.VALIDITY.format(Integer.valueOf(cardInfo.getValidity())));
-        telegramBuffer.append(Item.CVC.format(Integer.valueOf(cardInfo.getCvc())));
-        telegramBuffer.append(Item.AMOUNT.format(payment.getAmount()));
+        telegramBuffer.append(Item.VALIDITY.format(cardInfo.getValidity()));
+        telegramBuffer.append(Item.CVC.format(cardInfo.getCvc()));
+        telegramBuffer.append(Item.AMOUNT.format(String.valueOf(payment.getAmount())));
         telegramBuffer.append(Item.VALUE_ADDED_TAX.format(payment.getValueAddedTax()));
         telegramBuffer.append(Item.ORIGIN_MANAGEMENT_NUMBER.format(payment.getOriginManagementNumber()));
         telegramBuffer.append(Item.ENCRYPT_CART_INFO.format(cardInfo.toEncryptString()));
-        telegramBuffer.append(Item.EXTRA_FIELD.format(""));
+        telegramBuffer.append(Item.ADDITIONAL_FIELD.format(payment.getAdditionalField()));
 
-        String telegramLength = Item.DATA_LENGTH.format(telegramBuffer.length());
+        String telegramLength = Item.DATA_LENGTH.format(String.valueOf(telegramBuffer.length()));
 
+        log.debug("[TELEGRAM] {}", telegramBuffer.toString());
         return new CardCompany(payment.getManagementNumber(), telegramLength, telegramBuffer.toString());
     }
 }

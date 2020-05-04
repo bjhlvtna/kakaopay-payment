@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.CreationTimestamp;
 
+import javax.management.StringValueExp;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -54,6 +55,13 @@ public class Payment {
     @CreationTimestamp
     @Column(name = "create_time_at", nullable = false)
     private LocalDateTime createTimeAt;
+
+    @Column(name = "additional_field", length = 47, updatable = false)
+    private String additionalField;
+
+    public String getAdditionalField() {
+        return this.additionalField == null ? "" : this.additionalField;
+    }
 
     public String getOriginManagementNumber() {
         return StringUtils.isEmpty(this.originManagementNumber) ? StringUtils.EMPTY : this.originManagementNumber;
