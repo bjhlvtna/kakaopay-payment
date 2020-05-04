@@ -63,14 +63,14 @@ class PaymentReqServiceTest {
 
     }
 
-    @Test
-    public void transaction_test() throws Exception {
-        String actual1 = paymentService.payProcess(paymentReqOne);
-        String actual2 = paymentService.payProcess(paymentReqTwo);
-
-        System.out.println(actual1);
-        System.out.println(actual2);
-        System.out.println(paymentService.count());
-//        System.out.println(paymentService.findByManagementNumber(actual2));
-    }
+//    @Test
+//    public void transaction_test() throws Exception {
+//        String actual1 = paymentService.payProcess(paymentReqOne);
+//        String actual2 = paymentService.payProcess(paymentReqTwo);
+//
+//        System.out.println(actual1);
+//        System.out.println(actual2);
+//        System.out.println(paymentService.count());
+////        System.out.println(paymentService.findByManagementNumber(actual2));
+//    }
 }

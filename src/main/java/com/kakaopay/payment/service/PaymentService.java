@@ -14,6 +14,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Slf4j
 @Service
 public class PaymentService {
@@ -63,7 +65,8 @@ public class PaymentService {
                         .build())
                 .build());
 
-        payment.setValueAddedTax(calculateValueAddedTax(payment.getAmount(), payment.getValueAddedTax()));
+//        payment.setValueAddedTax(setAdditionalPaymentInfo(payment.getAmount(), payment.getValueAddedTax()));
+        setAdditionalPaymentInfo(payment);
         if (this.telegramTransfer.transfer(payment)) {
             payment.setTransferSuccess(true);
         }
@@ -71,24 +74,11 @@ public class PaymentService {
                 .managementNumber(this.paymentRepository.save(payment).getManagementNumber())
                 .additionalInfo(StringUtils.EMPTY)
                 .build();
-//        return process(payment);
     }
 
-    //    @Transactional
     public PaymentDto.TransactionRes cancelProcess(PaymentDto.CancelReq cancelReq) throws CancelAmountException {
         Payment cancel = (Payment) convert(cancelReq, Payment.class);
-        cancel.setManagementNumber(generateManagementNumber());
-        cancel.setValueAddedTax(calculateValueAddedTax(cancel.getAmount(), cancel.getValueAddedTax()));
-        // 가장 최근 결제 내용 받아옴
-        Payment prevPayment = this.paymentRepository.findByLatestPayment(cancel.getOriginManagementNumber());
-        // valid check
-        if (!validCancelAmount(prevPayment.getAmount(), prevPayment.getValueAddedTax(), cancel.getAmount(), cancel.getValueAddedTax())) {
-            throw new CancelAmountException();
-        }
-        cancel.setPaymentCardInfo(prevPayment.getPaymentCardInfo());
-        cancel.setInstallmentMonth(DEFAULT_INSTALLMENT_MONTH);
-        cancel.setAmount(prevPayment.getAmount() - cancel.getAmount());
-        cancel.setValueAddedTax(prevPayment.getValueAddedTax() - cancel.getValueAddedTax());
+        setAdditionalPaymentInfo(cancel);
 
         if (this.telegramTransfer.transfer(cancel)) {
             cancel.setTransferSuccess(true);
@@ -97,8 +87,85 @@ public class PaymentService {
                 .managementNumber(this.paymentRepository.save(cancel).getManagementNumber())
                 .additionalInfo(StringUtils.EMPTY)
                 .build();
-//        return this.paymentRepository.save(cancel).getManagementNumber();
-//        return process(cancel);
+    }
+
+    private void setAdditionalPaymentInfo(Payment currentPay) throws CancelAmountException {
+
+        Payment originPayment = this.paymentRepository.findByManagementNumber(currentPay.getOriginManagementNumber());
+        List<Payment> cancelPayments = this.paymentRepository.findAllByOriginManagementNumber(currentPay.getOriginManagementNumber());
+
+        Long totalAmount = cancelPayments.stream().mapToLong(Payment::getAmount).sum();
+        Integer totalTax = cancelPayments.stream().mapToInt(Payment::getValueAddedTax).sum();
+
+        Long amount = currentPay.getAmount();
+
+        long remainAmount = originPayment.getAmount() - totalAmount - amount;
+        int remainTax = originPayment.getValueAddedTax() - totalTax;
+
+        int currentTax = currentPay.getValueAddedTax() == null ? Math.round(currentPay.getAmount() / VALUE_ADDED_TAX_RATE) : currentPay.getValueAddedTax();
+
+        currentPay.setManagementNumber(generateManagementNumber());
+        currentPay.setPaymentCardInfo(originPayment.getPaymentCardInfo());
+        currentPay.setInstallmentMonth(DEFAULT_INSTALLMENT_MONTH);
+
+        if (remainAmount < 0 || ((remainTax - currentTax) < 0 && currentPay.getValueAddedTax() != null)) {
+            throw new CancelAmountException();
+        }
+        // 취소 금액은 맞으나 부가세가 남았을 경우
+        if (remainAmount == 0 && (remainTax - currentTax) != 0 && currentPay.getValueAddedTax() != null) {
+            throw new CancelAmountException();
+        }
+
+        if ((remainAmount - amount) == 0 && currentPay.getValueAddedTax() == null) {
+            currentPay.setValueAddedTax(remainTax);
+        } else {
+            currentPay.setValueAddedTax(currentTax);
+        }
+    }
+    //    @Transactional
+//    public PaymentDto.TransactionRes cancelProcess(PaymentDto.CancelReq cancelReq) throws CancelAmountException {
+//        Payment cancel = (Payment) convert(cancelReq, Payment.class);
+//        cancel.setManagementNumber(generateManagementNumber());
+//        cancel.setValueAddedTax(calculateValueAddedTax(cancel.getAmount(), cancel.getValueAddedTax()));
+//        // 가장 최근 결제 내용 받아옴
+//        Payment prevPayment = this.paymentRepository.findByLatestPayment(cancel.getOriginManagementNumber());
+//        // valid check
+//        if (!validCancelAmount(prevPayment.getAmount(), prevPayment.getValueAddedTax(), cancel.getAmount(), cancel.getValueAddedTax())) {
+//            throw new CancelAmountException();
+//        }
+//        cancel.setPaymentCardInfo(prevPayment.getPaymentCardInfo());
+//        cancel.setInstallmentMonth(DEFAULT_INSTALLMENT_MONTH);
+//        cancel.setAmount(prevPayment.getAmount() - cancel.getAmount());
+//        cancel.setValueAddedTax(prevPayment.getValueAddedTax() - cancel.getValueAddedTax());
+//
+//        if (this.telegramTransfer.transfer(cancel)) {
+//            cancel.setTransferSuccess(true);
+//        }
+//        return PaymentDto.TransactionRes.builder()
+//                .managementNumber(this.paymentRepository.save(cancel).getManagementNumber())
+//                .additionalInfo(StringUtils.EMPTY)
+//                .build();
+////        return this.paymentRepository.save(cancel).getManagementNumber();
+////        return process(cancel);
+//    }
+
+    public PaymentDto.PaymentRes findByLatestPayment(String managementNumber) {
+        Payment payment = paymentRepository.findByLatestPayment(managementNumber);
+        return (PaymentDto.PaymentRes) convert(payment, PaymentDto.PaymentRes.class);
+    }
+
+    public Payment findByRemainPayment(String managementNumber) {
+
+        Payment originPayment = this.paymentRepository.findByManagementNumber(managementNumber);
+        List<Payment> cancelPayments = this.paymentRepository.findAllByOriginManagementNumber(managementNumber);
+
+        Long totalAmount = cancelPayments.stream().mapToLong(Payment::getAmount).sum();
+        Integer totalTax = cancelPayments.stream().mapToInt(Payment::getValueAddedTax).sum();
+
+        return Payment.builder()
+                .amount(originPayment.getAmount() - totalAmount)
+                .valueAddedTax(originPayment.getValueAddedTax() - totalTax)
+                .build();
     }
 
     public int count() {
@@ -137,7 +204,7 @@ public class PaymentService {
      * 부가가치세는 결제금액보다 클 수 없습니다.
      * 결제금액이 1,000원일 때, 부가가치세는 0원일 수 있습니다
      */
-    private int calculateValueAddedTax(Long amount, Integer valueAddedTax) throws CancelAmountException {
+    private int setAdditionalPaymentInfo(Long amount, Integer valueAddedTax) throws CancelAmountException {
         if (valueAddedTax != null && amount > valueAddedTax) {
             return valueAddedTax;
         }
