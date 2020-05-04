@@ -243,12 +243,12 @@ CancelReq
 <tbody>
 <tr class="odd">
 <td><p><strong>amount</strong><br />
-<em>optional</em></p></td>
+<em>required</em></p></td>
 <td><p>integer (int64)</p></td>
 </tr>
 <tr class="even">
 <td><p><strong>managementNumber</strong><br />
-<em>optional</em></p></td>
+<em>required</em></p></td>
 <td><p>string</p></td>
 </tr>
 <tr class="odd">
@@ -258,6 +258,7 @@ CancelReq
 </tr>
 </tbody>
 </table>
+
 
 PaymentReq
 ----------
@@ -330,43 +331,45 @@ PaymentRes
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td><p><strong>additionalInfo</strong><br />
-<em>optional</em></p></td>
-<td><p>string</p></td>
-</tr>
 <tr class="even">
 <td><p><strong>amount</strong><br />
-<em>optional</em></p></td>
+<em>required</em></p></td>
 <td><p>integer (int64)</p></td>
 </tr>
 <tr class="odd">
 <td><p><strong>cardNumber</strong><br />
-<em>optional</em></p></td>
+<em>required</em></p></td>
 <td><p>string</p></td>
 </tr>
 <tr class="even">
 <td><p><strong>cvc</strong><br />
-<em>optional</em></p></td>
+<em>required</em></p></td>
 <td><p>string</p></td>
 </tr>
 <tr class="odd">
 <td><p><strong>paymentId</strong><br />
-<em>optional</em></p></td>
+<em>required</em></p></td>
 <td><p>string</p></td>
 </tr>
 <tr class="even">
 <td><p><strong>paymentType</strong><br />
-<em>optional</em></p></td>
+<em>required</em></p></td>
 <td><p>enum (PAYMENT, CANCEL)</p></td>
 </tr>
 <tr class="odd">
 <td><p><strong>validity</strong><br />
+<em>required</em></p></td>
+<td><p>string</p></td>
+</tr>
+ <tr class="odd">
+<td><p><strong>additionalInfo</strong><br />
 <em>optional</em></p></td>
 <td><p>string</p></td>
 </tr>
 </tbody>
 </table>
+
+
 
 TransactionRes
 --------------
@@ -383,18 +386,19 @@ TransactionRes
 </tr>
 </thead>
 <tbody>
+<tr class="even">
+<td><p><strong>managementNumber</strong><br />
+<em>required</em></p></td>
+<td><p>string</p></td>
+</tr>
 <tr class="odd">
 <td><p><strong>additionalInfo</strong><br />
 <em>optional</em></p></td>
 <td><p>string</p></td>
 </tr>
-<tr class="even">
-<td><p><strong>managementNumber</strong><br />
-<em>optional</em></p></td>
-<td><p>string</p></td>
-</tr>
 </tbody>
 </table>
+
 
 
 ---
@@ -459,7 +463,7 @@ TransactionRes
    * 전문 규약에 맞는 필드 `name, length, data type` 정의
    * 정의된 전문 규약을 통해 정해진 `String 전문 생성` 
 
-5. (선택) 부분 취소 API Test case 통과
+5. (선택) 부분 취소 API Test case **통과**
 
    * TODO
 
