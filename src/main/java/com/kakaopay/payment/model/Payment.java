@@ -41,7 +41,6 @@ public class Payment {
     @Column(name = "amount", nullable = false)
     private Long amount;
     // 부가가치세
-    // TODO: not null
     @Column(name = "value_added_tax", nullable = true)
     private Integer valueAddedTax;
     // 원거래관리번호 (FK)

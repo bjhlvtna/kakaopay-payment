@@ -19,7 +19,6 @@ public class CardInfo {
     private String validity;
     private String cvc;
 
-    // TODO: modelMapper mapping
     public String getMaskingCardNumber() {
         int repeatCount = cardNumber.length() - 6 - 3;
         return StringUtils.overlay(cardNumber, StringUtils.repeat("X", repeatCount), 6, cardNumber.length() - 3);

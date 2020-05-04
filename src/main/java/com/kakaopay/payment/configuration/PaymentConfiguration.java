@@ -39,10 +39,10 @@ public class PaymentConfiguration {
         };
     }
 
-    private PropertyMap<Payment, PaymentDto.PaymentReq> generateResponseDtoMapping() {
-        return new PropertyMap<Payment, PaymentDto.PaymentReq>() {
+    private PropertyMap<Payment, PaymentDto.PaymentRes> generateResponseDtoMapping() {
+        return new PropertyMap<Payment, PaymentDto.PaymentRes>() {
             protected void configure() {
-                map().setCardNumber(source.getPaymentCardInfo().getCardInfo().getCardNumber());
+                map().setCardNumber(source.getPaymentCardInfo().getCardInfo().getMaskingCardNumber());
                 map().setValidity(source.getPaymentCardInfo().getCardInfo().getValidity());
                 map().setCvc(source.getPaymentCardInfo().getCardInfo().getCvc());
             }

@@ -36,7 +36,6 @@ class PaymentReqControllerTest {
     @MockBean
     private PaymentService paymentService;
 
-    // TODO: dto valid check test 추가
     // 결제
     @Test
     public void givenValidPaymentDto_whenCreatePayment_thenSuccess() throws Exception {
