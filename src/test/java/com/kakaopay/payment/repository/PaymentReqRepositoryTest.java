@@ -57,7 +57,6 @@ class PaymentReqRepositoryTest {
                 .valueAddedTax(91)
                 .build();
 
-//        this.paymentCardInfoRepository.save(paymentCardInfo);
         this.paymentRepository.save(payment);
         this.paymentRepository.save(cancel);
 

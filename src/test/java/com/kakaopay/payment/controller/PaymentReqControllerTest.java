@@ -158,7 +158,7 @@ class PaymentReqControllerTest {
                 .cvc("777")
                 .paymentType(PaymentType.PAYMENT)
                 .amount(10000L)
-                .paymentId(MANAGEMENT_NUMBER_PAY)
+                .managementNumber(MANAGEMENT_NUMBER_PAY)
                 .build();
 
         when(paymentService.findByManagementNumber(any())).thenReturn(response);

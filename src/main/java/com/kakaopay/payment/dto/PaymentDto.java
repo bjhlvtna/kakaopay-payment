@@ -87,7 +87,7 @@ public class PaymentDto {
     @AllArgsConstructor
     public static class PaymentRes {
         //- 관리번호 ( UUID, 20자리 )
-        private String paymentId;
+        private String managementNumber;
 
         private String cardNumber;
         private String validity;
